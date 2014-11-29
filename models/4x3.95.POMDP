@@ -34,7 +34,7 @@
 #
 # Observation is limited to two wall detectors that can detect when a
 # a wall is to the left or right.  This gives the following possible
-# observations:
+# observations
 #
 # left, right, neither, both, good, bad, and absorb
 #
@@ -42,7 +42,7 @@
 
 discount: 0.95
 values: reward
-states: 11
+states: 0 1 2 3 4 5 6 7 8 9 10 
 actions: n s e w 
 observations: left right neither both good bad 
 
