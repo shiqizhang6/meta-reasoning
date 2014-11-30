@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import sys
 from numpy import matrix
 from numpy import ones
