@@ -5,12 +5,12 @@ from numpy import matrix
 from numpy import ones
 from numpy import zeros
 
-class Reasoner:
+class Reasoner(object):
 
     #####################################################################
     def __init__(self, 
-                 mapfile = '/home/szhang/projects/2015_meta_reasoning/meta-reasoning/maps/4x3.95.map',
-                 modelfile = '/home/szhang/projects/2015_meta_reasoning/meta-reasoning/models/4x3.95.POMDP'):
+                 mapfile = '../maps/4x3.95.map',
+                 writetofile = False):
 
         self.gridmap = []
         self.mapfile = mapfile
@@ -32,10 +32,16 @@ class Reasoner:
         self.model = self.create_model(self.model, self.gridmap, 
                                        self.motion_linear, self.motion_angular, 
                                        self.obs, self.reward)
+        if writetofile:
+            modelfile = mapfile.replace('.map', '.pomdp')
+            modelfile = mapfile.replace('maps', 'models')
+            self.write_to_file(self.model, modelfile)
+            print('WROTE TO: ' + modelfile + '\n')
 
-        self.write_to_file(self.model, modelfile)
-        print('WROTE TO: ' + modelfile + '\n')
 
+    #####################################################################
+    def get_model(self):
+        return self.model
 
     #####################################################################
     def write_to_file(self, model, modelfile):
