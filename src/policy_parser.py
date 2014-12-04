@@ -34,8 +34,8 @@ class Policy(object):
   def select_action(self, b):
     
     # sanity check if probabilities sum up to 1
-    if sum(b)[0] - 1.0 > 0.00001:
-      print('Error: belief does not sum to 1, diff: ', sum(b)[0] - 1.0)
+    if sum(b) - 1.0 > 0.00001:
+      print('Error: belief does not sum to 1, diff: ', sum(b) - 1.0)
       sys.exit()
 
     return self.actions[numpy.argmax(numpy.dot(self.policy, b)), 0]

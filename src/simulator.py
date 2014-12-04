@@ -11,6 +11,9 @@ import policy_parser
 # There is only one world, maintained by this simulator
 # Multiple planners will be using this simulator
 ######################################################################
+
+delta = 0.00001
+
 class Simulator(object):
 
     ##################################################################
@@ -23,23 +26,33 @@ class Simulator(object):
         self.pos = position # [r, c, o]
         self.prior = None # a distribution over all agents
 
-        self.action = None
+        self.action = 0 # assigning an initial position
         self.obs = None
         self.decision_maker = 0 # agent 0 makes the decision
+
+        num_states = len(self.agents[0].model['states'])
+        for a in self.agents:
+            a.belief = numpy.ones( (num_states) ) / num_states
 
         self.run(self.decision_maker)
 
     ##################################################################
     def run(self, n):
 
+        self.action = 0
+        num_states = len(self.agents[0].model['states'])
+
         while True:
 
             self.obs = self.observe(self.reasoner, self.action, self.pos)
-            self.action = self.agents[n].select_action(self.agents[n].belief, \
-                                                       self.agents[n].policy)
+            print('observation: ' + str(self.obs))
+
+            self.action = self.agents[n].select_action(self.agents[n].belief)
+            print('action: ' + str(self.action))
+
             post = []
             for a in self.agents:
-                p, a.belief = a.update_belief(a.obs, a.action, a.model)
+                p, a.belief = a.update_belief(a.belief, a.obs, a.action, a.model)
                 post.append(p) # need normalization
 
         return True
@@ -54,8 +67,6 @@ class Simulator(object):
         state = self.rco_to_state(pos[0], pos[1], pos[2], gridmap)
         for i in range(len(model['observations'])):
             acc += model['obs_mat'][action, state, i]
-            print(acc)
-            print(rand)
             if acc > rand:
                 obs = i
                 break
@@ -97,7 +108,7 @@ class Simulator(object):
 ######################################################################
 class Agent(object):
 
-    delta = 0.00001
+    global delta
 
     ##################################################################
     def __init__(self, gridmap = None, model = None, policy = None):
@@ -110,24 +121,26 @@ class Agent(object):
         self.gridmap = gridmap
 
     ##################################################################
-    def select_action(self):
+    def select_action(self, belief):
+        
+        print('belief: ' + str(belief))
 
-        if sum(self.belief) - 1.0 > delta:
+        if sum(belief) - 1.0 > delta:
             print('BELIEF DOES NOT SUM TO ONE')
             sys.exit()
     
-        self.action = numpy.argmax(numpy.dot(self.policy.policy, self.belief))
+        self.action = self.policy.select_action(belief)
         return self.action
 
     ##################################################################
-    def update_belief(self):
+    def update_belief(self, b, obs, action, model):
 
-        new_b = numpy.dot(self.belief, self.model)
+        new_b = numpy.dot(b, model)
 
-        for i in range(len(self.model['states'])):
-            new_b[0, i] *= self.model['obs_mat'][self.action, i, self.obs]
+        for i in range(len(model['states'])):
+            new_b[0, i] *= model['obs_mat'][action, i, obs]
 
-        self.b = (new_b / sum(new_b.T)).T
+        b = (new_b / sum(new_b.T)).T
 
         return posterior, belief
 

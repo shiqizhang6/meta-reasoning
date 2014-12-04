@@ -352,5 +352,5 @@ class Reasoner(object):
 #####################################################################
 if __name__ == "__main__":
 
-    reasoner = Reasoner(mapfile = '../maps/00.map', writetofile = True)
+    reasoner = Reasoner(mapfile = '../maps/test2.map', writetofile = True)
 
