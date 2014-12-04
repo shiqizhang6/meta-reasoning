@@ -34,7 +34,7 @@ class Reasoner(object):
                                        self.obs, self.reward)
         if writetofile:
             modelfile = mapfile.replace('.map', '.pomdp')
-            modelfile = mapfile.replace('maps', 'models')
+            modelfile = modelfile.replace('maps', 'models')
             self.write_to_file(self.model, modelfile)
             print('WROTE TO: ' + modelfile + '\n')
 
@@ -352,5 +352,5 @@ class Reasoner(object):
 #####################################################################
 if __name__ == "__main__":
 
-    reasoner = Reasoner()
+    reasoner = Reasoner(mapfile = '../maps/00.map', writetofile = True)
 

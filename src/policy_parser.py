@@ -12,7 +12,7 @@ class Policy(object):
     try:
       f = open(filename, 'r')
     except:
-      print('\nError: unable to open file: ' + filename)
+      print('\nError: unable to open file: ' + filename + '\n')
 
     lines = f.readlines()
 
