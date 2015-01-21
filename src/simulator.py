@@ -42,6 +42,8 @@ class Simulator(object):
         self.action = 0
         num_states = len(self.agents[0].model['states'])
 
+        print('number of states: ' + str(num_states))
+
         while True:
 
             self.obs = self.observe(self.reasoner, self.action, self.pos)
@@ -52,7 +54,8 @@ class Simulator(object):
 
             post = []
             for a in self.agents:
-                p, a.belief = a.update_belief(a.belief, a.obs, a.action, a.model)
+
+                p, a.belief = a.update_belief(a.belief, self.obs, self.action, a.model)
                 post.append(p) # need normalization
 
         return True
@@ -123,7 +126,7 @@ class Agent(object):
     ##################################################################
     def select_action(self, belief):
         
-        print('belief: ' + str(belief))
+        # print('belief: ' + str(belief))
 
         if sum(belief) - 1.0 > delta:
             print('BELIEF DOES NOT SUM TO ONE')
@@ -135,14 +138,18 @@ class Agent(object):
     ##################################################################
     def update_belief(self, b, obs, action, model):
 
-        new_b = numpy.dot(b, model)
+        new_b = numpy.dot(b, model['trans_mat'][action])
 
         for i in range(len(model['states'])):
-            new_b[0, i] *= model['obs_mat'][action, i, obs]
+
+            new_b[i] *= model['obs_mat'][action,i,obs]
 
         b = (new_b / sum(new_b.T)).T
 
-        return posterior, belief
+        ################## TODO TODO ####################
+        posterior = 1
+
+        return posterior, b
 
 
 ######################################################################
