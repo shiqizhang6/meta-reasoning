@@ -2,10 +2,12 @@
 
 import numpy
 import sys
+import matplotlib
+import matplotlib.pyplot
+import time
 
 import meta_reasoner
 import policy_parser
-
 
 ######################################################################
 # There is only one world, maintained by this simulator
@@ -20,7 +22,8 @@ class Simulator(object):
     def __init__(self, gridmap = None, reasoner = None, agents = None, \
                  position = None):
 
-        self.gridmap = gridmap
+        f = open(gridmap, 'r')
+        self.gridmap = f.read().splitlines()
         self.reasoner = reasoner
         self.agents = agents
         self.pos = position # [r, c, o]
@@ -44,6 +47,8 @@ class Simulator(object):
 
         print('number of states: ' + str(num_states))
 
+        self.visualize(self.gridmap, self.agents[n].belief, self.pos)
+
         while True:
 
             self.obs = self.observe(self.reasoner, self.action, self.pos)
@@ -55,13 +60,43 @@ class Simulator(object):
             post = []
             for a in self.agents:
 
-                p, a.belief = a.update_belief(a.belief, self.obs, self.action, a.model)
+                p, a.belief = a.update_belief(a.belief, self.obs, self.action, 
+                                              a.model)
+                curr_state = self.rco_to_state(self.pos[0], self.pos[1], self.pos[2],
+                                          self.gridmap)
+
+                next_state_2d_mat = numpy.random.multinomial(1, a.model['trans_mat'][self.action][curr_state], 1)
+                next_state = numpy.argmax(next_state_2d_mat[0])
+                print('next state: ' + str(next_state))
+
+                self.pos = self.state_to_rco(next_state, self.gridmap)
+
+                self.visualize(self.gridmap, self.agents[n].belief, self.pos)
+
                 post.append(p) # need normalization
 
         return True
 
     ##################################################################
+    def visualize(self, gridmap, belief, pos):
+
+        print(str(gridmap[0]))
+        print(str(len(gridmap)))
+        print(str(len(gridmap[0])))
+        print(str(len(belief)))
+        # the third dimensional identifies the orientations
+        belief_3d = numpy.reshape(belief, (len(gridmap)-2, len(gridmap[0])-2, 4))
+        # accumulate the values for orientations
+        belief_2d = numpy.add.accumulate(belief_3d, 2)[:,:,3]
+        
+        print(belief_2d)
+        img = matplotlib.pyplot.imshow(belief_2d, cmap=matplotlib.pyplot.gray(), interpolation='nearest')
+        matplotlib.pyplot.show()
+
+
+    ##################################################################
     def observe(self, reasoner, action, pos):
+        
         gridmap = reasoner.gridmap
         model = reasoner.model
 
